@@ -23,6 +23,7 @@ public class ApiItemController {
 
     @GetMapping("/api/items/{id}")
     Mono<Item> findById(@PathVariable String id){
+
         return this.itemRepository.findById(id);
     }
 
@@ -33,6 +34,18 @@ public class ApiItemController {
                         .created(URI.create("/api/items/"+
                                 savedItem.getId()))
                         .body(savedItem));
+    }
+
+    @PutMapping("/api/items/{id}")
+    public Mono<ResponseEntity<?>> updateItem(
+            @RequestBody Mono<Item> item,
+            @PathVariable String id
+    ){
+        return item
+                .map(content -> new Item(id, content.getName(),content.getDescription(),
+                        content.getPrice()))
+                .flatMap(this.itemRepository::save)
+                .map(ResponseEntity::ok);
     }
 
 }
